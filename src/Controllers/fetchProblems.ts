@@ -9,7 +9,7 @@ const fetchProblems = async (
 ) => {
   try {
     // always set limit to 20 if it is undefined, since the function is fetchProblems and expect multiple problems
-    const limit = options.limit === undefined ? 20 : options.limit
+    const limit = options.limit === undefined ? 2000 : options.limit
     const skip = options.skip || 0; // Default to 0 if not provided
     const tags = options.tags ? options.tags.split(' ') : ''; // Split tags or default to empty string as an empty array can cause a fallback to default
     const difficulty = options.difficulty || undefined; // difficulty has to be 'EASY', 'MEDIUM' or 'HARD'
