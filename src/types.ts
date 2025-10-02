@@ -62,7 +62,7 @@ export interface UserData {
     };
   }[];
   matchedUser: MatchedUser;
-  recentAcSubmissionList: {}[];
+  recentAcSubmissionList: unknown[];
   recentSubmissionList: Submission[];
 }
 
@@ -75,14 +75,14 @@ type Difficulty = 'All' | 'Easy' | 'Medium' | 'Hard';
 //User Details
 export type FetchUserDataRequest = Request<
   { username: string },
-  {},
+  unknown,
   { username: string; limit: number },
   { limit: number }
 >;
 
 export type TransformedUserDataRequest = Request<
-  {},
-  {},
+  unknown,
+  unknown,
   { username: string; limit: number }
 >;
 
@@ -90,7 +90,7 @@ export type TransformedUserDataRequest = Request<
 export interface ProblemSetQuestionListData {
   problemsetQuestionList: {
     total: number;
-    questions: {}[];
+    questions: unknown[];
   };
 }
 
@@ -107,14 +107,14 @@ interface Question {
   companyTagStats: string[];
   difficulty: Difficulty;
   dislikes: number;
-  exampleTestcases: {}[];
-  hints: {}[];
+  exampleTestcases: unknown[];
+  hints: unknown[];
   isPaidOnly: boolean;
   likes: number;
   questionId: number;
   questionFrontendId: number;
   solution: string;
-  similarQuestions: {}[];
+  similarQuestions: unknown[];
   title: string;
   titleSlug: string;
   topicTags: string[];

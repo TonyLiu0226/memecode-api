@@ -5,13 +5,14 @@ import * as leetcode from './leetCode';
 import { FetchUserDataRequest } from './types';
 import apicache from 'apicache';
 import axios from 'axios';
+import { userProfileQuery } from './GQLQueries';
 import {
   userContestRankingInfoQuery,
   discussCommentsQuery,
   discussTopicQuery,
   userProfileUserQuestionProgressV2Query,
   skillStatsQuery,
-  getUserProfileQuery,
+  
   userProfileCalendarQuery,
   officialSolutionQuery,
   dailyQeustion,
@@ -23,7 +24,7 @@ const API_URL = process.env.LEETCODE_API_URL || 'https://leetcode.com/graphql';
 
 const limiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  limit: 60,
+  limit: 1000,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   message: 'Too many request from this IP, try again in 1 hour',
@@ -161,20 +162,9 @@ app.get('/userProfileCalendar', async (req, res) => {
 const formatData = (data: any) => {
   return {
     totalSolved: data.matchedUser.submitStats.acSubmissionNum[0].count,
-    totalSubmissions: data.matchedUser.submitStats.totalSubmissionNum,
-    totalQuestions: data.allQuestionsCount[0].count,
     easySolved: data.matchedUser.submitStats.acSubmissionNum[1].count,
-    totalEasy: data.allQuestionsCount[1].count,
     mediumSolved: data.matchedUser.submitStats.acSubmissionNum[2].count,
-    totalMedium: data.allQuestionsCount[2].count,
     hardSolved: data.matchedUser.submitStats.acSubmissionNum[3].count,
-    totalHard: data.allQuestionsCount[3].count,
-    ranking: data.matchedUser.profile.ranking,
-    contributionPoint: data.matchedUser.contributions.points,
-    reputation: data.matchedUser.profile.reputation,
-    submissionCalendar: JSON.parse(data.matchedUser.submissionCalendar),
-    recentSubmissions: data.recentSubmissionList,
-    matchedUserStats: data.matchedUser.submitStats,
   };
 };
 
@@ -182,7 +172,7 @@ app.get('/userProfile/:id', async (req, res) => {
   const user = req.params.id;
 
   try {
-    const data = await queryLeetCodeAPI(getUserProfileQuery, {
+    const data = await queryLeetCodeAPI(userProfileQuery, {
       username: user,
     });
     if (data.errors) {

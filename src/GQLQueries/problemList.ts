@@ -10,20 +10,14 @@ const query = `#graphql
             questions: data {
                 acRate
                 difficulty
-                freqBar
-                questionFrontendId
-                isFavor
                 isPaidOnly
                 status
                 title
                 titleSlug
                 topicTags {
                     name
-                    id
                     slug
                 }
-                hasSolution
-                hasVideoSolution
             }
         }
 }`;
