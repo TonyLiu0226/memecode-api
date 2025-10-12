@@ -19,7 +19,7 @@ import {
 } from './GQLQueries/newQueries';
 
 const app = express();
-let cache = apicache.middleware;
+const cache = apicache.middleware;
 const API_URL = process.env.LEETCODE_API_URL || 'https://leetcode.com/graphql';
 
 const limiter = rateLimit({
@@ -30,15 +30,43 @@ const limiter = rateLimit({
   message: 'Too many request from this IP, try again in 1 hour',
 });
 
+// CORS configuration
+const corsOptions = {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://127.0.0.1:3002',
+      'http://localhost:3002',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001',
+    ];
+    
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+// Place CORS before cache so cached responses include headers
+app.use(cors(corsOptions));
+// Explicit preflight handling to ensure headers on OPTIONS
+app.options('*', cors(corsOptions));
+
+// Now enable cache so responses include CORS headers from above
 app.use(cache('5 minutes'));
-app.use(cors()); //enable all CORS request
 app.use(limiter); //limit to all API
 app.use((req: express.Request, _res: Response, next: NextFunction) => {
   console.log('Requested URL:', req.originalUrl);
   next();
 });
 
-async function queryLeetCodeAPI(query: string, variables: any) {
+async function queryLeetCodeAPI(query: string, variables: Record<string, unknown>) {
   try {
     const response = await axios.post(API_URL, { query, variables });
     if (response.data.errors) {
@@ -159,7 +187,15 @@ app.get('/userProfileCalendar', async (req, res) => {
 });
 
 // Format data
-const formatData = (data: any) => {
+type FormatDataInput = {
+  matchedUser: {
+    submitStats: {
+      acSubmissionNum: { count: number }[];
+    };
+  };
+};
+
+const formatData = (data: FormatDataInput) => {
   return {
     totalSolved: data.matchedUser.submitStats.acSubmissionNum[0].count,
     easySolved: data.matchedUser.submitStats.acSubmissionNum[1].count,
@@ -185,7 +221,11 @@ app.get('/userProfile/:id', async (req, res) => {
   }
 });
 
-const handleRequest = async (res: Response, query: string, params: any) => {
+const handleRequest = async (
+  res: Response,
+  query: string,
+  params: Record<string, unknown>
+) => {
   try {
     const data = await queryLeetCodeAPI(query, params);
     res.json(data);

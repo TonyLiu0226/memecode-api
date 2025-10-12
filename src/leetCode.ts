@@ -132,16 +132,18 @@ export const selectProblemRaw = (req: Request, res: Response) => {
 }
 
 export const problems = (
-  req: Request<{}, {}, {}, { limit: number; skip: number; tags: string; difficulty: string }>,
+  req: Request<object, object, object, { limit: number; skip: number; tags: string; difficulty: string; session: string; csrftoken: string }>,
   res: Response
 ) => {
   const difficulty = req.query.difficulty;
   const limit = req.query.limit;
   const skip = req.query.skip;
   const tags = req.query.tags;
+  const session = req.query.session;
+  const csrftoken = req.query.csrftoken;
 
   controllers.fetchProblems(
-    { limit, skip, tags, difficulty },
+    { limit, skip, tags, difficulty, session, csrftoken },
     res,
     formatUtils.formatProblemsData,
     gqlQueries.problemListQuery
